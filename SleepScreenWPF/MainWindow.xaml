@@ -5,10 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SleepScreenWPF"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800"
+        Loaded="Window_Loaded"
+        >
     <Grid>
-        <Button Content="Sleep Screen" HorizontalAlignment="Left" Margin="175,279,0,0" VerticalAlignment="Top" Height="30" Width="105" Click="Button_Click"/>
-        <Button Content="Lock Screen" HorizontalAlignment="Center" Margin="0,279,0,0" VerticalAlignment="Top" Height="30" Width="105" Click="Button_Click_1"/>
+        
+        <Button Content="Connect" HorizontalAlignment="Left" Margin="665,369,0,0" VerticalAlignment="Top" Height="30" Width="105" Click="Connect_Button"/>
+        <Button Content="Lock Screen" HorizontalAlignment="Left" Margin="665,84,0,0" VerticalAlignment="Top" Height="30" Width="105" Click="Lock_Button"/>
+        <Button Content="Sleep Screen" HorizontalAlignment="Left" Margin="665,34,0,0" VerticalAlignment="Top" Height="30" Width="105" Click="Screen_Off_Button"/>
+        <TextBox Name="Log" TextWrapping="Wrap" Text="" VerticalScrollBarVisibility="Auto" Margin="0,0,165,0"/>
 
     </Grid>
 </Window>
