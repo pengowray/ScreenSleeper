@@ -34,6 +34,50 @@ namespace SleepScreenWPF {
 
         public MainWindow() {
             InitializeComponent();
+
+            // shortcuts for font size
+            this.KeyDown += MainWindow_KeyDown;
+            this.PreviewMouseWheel += MainWindow_PreviewMouseWheel;
+        }
+
+        private void MainWindow_KeyDown(object sender, KeyEventArgs e) {
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control) {
+                switch (e.Key) {
+                    case Key.OemPlus:
+                    case Key.Add:
+                        IncreaseFontSize();
+                        e.Handled = true;
+                        break;
+                    case Key.OemMinus:
+                    case Key.Subtract:
+                        DecreaseFontSize();
+                        e.Handled = true;
+                        break;
+                }
+            }
+        }
+
+        private void MainWindow_PreviewMouseWheel(object sender, MouseWheelEventArgs e) {
+            if (Keyboard.Modifiers == ModifierKeys.Control) {
+                if (e.Delta > 0) {
+                    IncreaseFontSize();
+                } else if (e.Delta < 0) {
+                    DecreaseFontSize();
+                }
+                e.Handled = true;
+            }
+        }
+
+        private void IncreaseFontSize() {
+            if (Log.FontSize < 36) {
+                Log.FontSize += 2;
+            }
+        }
+
+        private void DecreaseFontSize() {
+            if (Log.FontSize > 8) {
+                Log.FontSize -= 2;
+            }
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
