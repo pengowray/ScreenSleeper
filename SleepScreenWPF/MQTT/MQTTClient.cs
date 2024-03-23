@@ -92,7 +92,23 @@ namespace MQTT {
 
             _mqttClient.ConnectedAsync += async (args) => {
                 StatusEvent?.Invoke(this, $"### CONNECTED TO SERVER ### {args.ConnectResult.ResultCode} {args.ConnectResult.ResponseInformation}");
-                RetryAttempts = 0;
+                if (args.ConnectResult.ResultCode == MqttClientConnectResultCode.Success) {
+                    RetryAttempts = 0;
+                }
+
+                if (!string.IsNullOrWhiteSpace(args.ConnectResult.ServerReference)) {
+                    //TODO: automatically connect to server reference?
+                    //ServerReference = args.ConnectResult.ServerReference;
+                    StatusEvent?.Invoke(this, $"### SERVER REFERENCE (use instead?): {args.ConnectResult.ServerReference}");
+                }
+
+                if (!string.IsNullOrWhiteSpace(args.ConnectResult.AssignedClientIdentifier)) {
+                    StatusEvent?.Invoke(this, $"### Assigned Client Identifier: {args.ConnectResult.AssignedClientIdentifier}");
+                }
+
+                //should check this in case user has used wildcards and not available
+                //WildcardSubscriptionAvailable = args.ConnectResult.WildcardSubscriptionAvailable;
+
                 await Task.CompletedTask;
             };
         }

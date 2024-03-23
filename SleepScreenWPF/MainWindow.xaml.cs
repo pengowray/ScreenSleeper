@@ -92,6 +92,10 @@ namespace SleepScreenWPF {
             //ListenMQTTTask.Wait();
         }
 
+        private void Disconnect_Button(object sender, RoutedEventArgs e) {
+            LogThreadsafe("Disconnecting...");
+            MqttClient?.DisconnectAsync().Wait();
+        }
 
         private void TurnMonitorOn() {
             SleepLib.MonitorOn();
@@ -202,19 +206,22 @@ namespace SleepScreenWPF {
 
                 var result = await MqttClient.ConnectAsync();
                 if (result.ResultCode == MQTTnet.Client.MqttClientConnectResultCode.Success) {
-                    LogThreadsafe("Connected!");
+                    //LogThreadsafe("Connected!"); // redundant
                     await MqttClient.ListenToTopicAsync("$SYS/broker/version"); // show verison e.g. "mosquitto version 2.0.18"
                     await MqttClient.ListenToTopicAsync("homeassistant/status"); // show "online"
                     if (hasAction) {
                         var topics = Config.Triggers.Select(a => a.Topic).Distinct().Where(topic => !string.IsNullOrWhiteSpace(topic)).ToArray();
                         foreach (var topic in topics) {
                             await MqttClient.ListenToTopicAsync(topic);
-                            LogThreadsafe($"Listening to topic: {topic}");
+                            LogThreadsafe($"Listening to topic: '{topic}'");
                         }
-                        LogThreadsafe("Action list:");
+                        LogThreadsafe("Triggers:");
                         int count = 0;
                         foreach (var action in Config?.Triggers ?? []) {
                             LogThreadsafe($"{++count}. when topic '{action.Topic}' with payload '{action.Payload}' do '{action.Action}'");
+                        }
+                        if (count==0) {
+                            LogThreadsafe("(none)");
                         }
                     }
                 } else {
@@ -252,5 +259,6 @@ namespace SleepScreenWPF {
                 LogThreadsafe($"Config folder not found: '{dir}'");
             }
         }
+
     }
 }

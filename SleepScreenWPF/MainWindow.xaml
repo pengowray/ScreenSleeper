@@ -19,8 +19,10 @@
         <StackPanel Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="10">
             <Button Content="Test Sleep Screen" Height="30" Width="104" Margin="0,10,0,0" Click="Screen_Off_Button"/>
             <Button Content="Test Lock Screen" Height="30" Width="104" Margin="0,10,0,0" Click="Lock_Button"/>
-            <Button Content="View config" Height="30" Width="104" Margin="0,10,0,0" Click="Show_Config_Folder_Explorer"/>
+            <Button Content="Find config" Height="30" Width="104" Margin="0,10,0,0" Click="Show_Config_Folder_Explorer"/>
+            <Button Content="Disconnect" Height="30" Width="104" Margin="0,10,0,0" Click="Disconnect_Button"/>
             <Button Content="Connect" Height="30" Width="104" Margin="0,10,0,0" Click="Connect_Button"/>
+
         </StackPanel>
     </Grid>
 </Window>
