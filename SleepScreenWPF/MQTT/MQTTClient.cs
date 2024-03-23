@@ -10,6 +10,10 @@ namespace MQTT {
         private readonly MqttClientOptions _mqttClientOptions;
 
         public event EventHandler<MqttApplicationMessageReceivedEventArgs> MessageReceived;
+        public event EventHandler<string> StatusEvent;
+
+        int RetryAttempts = 0;
+        int MaxRetry = 10;
 
         public MQTTClient(string brokerAddress, string username, string password) {
             var mqttFactory = new MqttFactory();
@@ -28,6 +32,23 @@ namespace MQTT {
                 //.WithAuthentication("password", Encoding.UTF8.GetBytes(password))
                 .WithCredentials(username, password)
                 .Build();
+
+            //TODO: configurable reconnection
+            _mqttClient.DisconnectedAsync += async (args) => {
+                StatusEvent?.Invoke(this, "### DISCONNECTED FROM SERVER ###");
+                if (RetryAttempts++ > MaxRetry) {
+                    StatusEvent?.Invoke(this, "### MAX RETRY ATTEMPTS REACHED ###");
+                    return;
+                } else {
+                    StatusEvent?.Invoke(this, $"### RECONNECTING {RetryAttempts}/{MaxRetry} ###");
+                }
+                await Task.Delay(TimeSpan.FromSeconds(5));
+                try {
+                    await _mqttClient.ConnectAsync(_mqttClientOptions);
+                } catch {
+                    StatusEvent?.Invoke(this, "### RECONNECTION ERROR ###");
+                }
+            };
         }
 
         public async Task<MqttClientConnectResult> ConnectAsync() {

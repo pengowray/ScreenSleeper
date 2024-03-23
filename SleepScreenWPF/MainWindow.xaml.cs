@@ -107,7 +107,6 @@ namespace SleepScreenWPF {
                 LogThreadsafe($"Connecting to MQTT server: {Config.Server}...");
 
                 MqttClient = new MQTTClient(Config.Server, Config.Username, Config.Password);
-
                 MqttClient.MessageReceived += (s, e) => {
                     string topic = e.ApplicationMessage.Topic;
                     string payload = e.ApplicationMessage.ConvertPayloadToString();
@@ -203,7 +202,7 @@ namespace SleepScreenWPF {
                     System.Diagnostics.Process.Start("explorer.exe", dir);
                 }
             } else {
-                LogThreadsafe("Config folder not found.");
+                LogThreadsafe($"Config folder not found: '{dir}'");
             }
         }
     }
