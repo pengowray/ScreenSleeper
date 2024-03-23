@@ -104,9 +104,12 @@ namespace SleepScreenWPF {
                     return;
                 }
 
-                LogThreadsafe($"Connecting to MQTT server: {Config.Server}...");
+                LogThreadsafe($"Connecting to MQTT server {Config.ParseFullUrl()}...");
 
-                MqttClient = new MQTTClient(Config.Server, Config.Username, Config.Password);
+                MqttClient = new MQTTClient(Config);
+                MqttClient.StatusEvent += (s, e) => {
+                    LogThreadsafe(e);
+                };
                 MqttClient.MessageReceived += (s, e) => {
                     string topic = e.ApplicationMessage.Topic;
                     string payload = e.ApplicationMessage.ConvertPayloadToString();
@@ -120,10 +123,10 @@ namespace SleepScreenWPF {
 
                     if (Config == null) return;
 
-                    bool hasAction = Config.Action != null && Config.Action.Length > 0;
+                    bool hasAction = Config?.Triggers != null && Config.Triggers.Length > 0;
                     if (!hasAction) return;
                     
-                    var matchingActions = Config.Action.Where(a => a.Topic == e.ApplicationMessage.Topic && a.Payload == payload).ToArray();
+                    var matchingActions = Config.Triggers.Where(a => a.Topic == e.ApplicationMessage.Topic && a.Payload == payload).ToArray();
                     if (matchingActions.Length > 0) {
                         foreach (var action in matchingActions) {
                             LogThreadsafe($"Action: {action.Action}; Topic: {action.Topic}; Payload: {action.Payload}");
@@ -148,7 +151,7 @@ namespace SleepScreenWPF {
                     }   
                 };
 
-                bool hasAction = Config.Action != null && Config.Action.Length > 0;
+                bool hasAction = Config.Triggers != null && Config.Triggers.Length > 0;
                 if (!hasAction) {
                     LogThreadsafe("No action(s) configured.");
                 }
@@ -159,14 +162,14 @@ namespace SleepScreenWPF {
                     await MqttClient.ListenToTopicAsync("$SYS/broker/version"); // show verison e.g. "mosquitto version 2.0.18"
                     await MqttClient.ListenToTopicAsync("homeassistant/status"); // show "online"
                     if (hasAction) {
-                        var topics = Config.Action.Select(a => a.Topic).Distinct().Where(topic => !string.IsNullOrWhiteSpace(topic)).ToArray();
+                        var topics = Config.Triggers.Select(a => a.Topic).Distinct().Where(topic => !string.IsNullOrWhiteSpace(topic)).ToArray();
                         foreach (var topic in topics) {
                             await MqttClient.ListenToTopicAsync(topic);
                             LogThreadsafe($"Listening to topic: {topic}");
                         }
                         LogThreadsafe("Action list:");
                         int count = 0;
-                        foreach (var action in Config?.Action ?? []) {
+                        foreach (var action in Config?.Triggers ?? []) {
                             LogThreadsafe($"{++count}. when topic '{action.Topic}' with payload '{action.Payload}' do '{action.Action}'");
                         }
                     }

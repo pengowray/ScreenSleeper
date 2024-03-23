@@ -45,7 +45,7 @@ public class SleepConfigManager {
             Username = "screensleeper",
             Password = "hackme",
             AutoConnect = false,
-            Action = new[] {
+            Triggers = new[] {
                 new ActionConfig {
                     Topic = "your/topic",
                     Payload = "sleep",
