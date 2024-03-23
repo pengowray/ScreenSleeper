@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 namespace SleepScreenWPF.Settings;
 public class SleepConfigManager {
 
-    private static readonly string _appName = "ScreenSleeper";
-    private readonly string _configFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), _appName);
-    private readonly string _configFile = "mqttConfig.json";
+    public static readonly string _appName = "ScreenSleeper";
+    public readonly string _configFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), _appName);
+    public readonly string _configFile = "mqttConfig.json";
 
     public SleepConfigManager() {
         if (!Directory.Exists(_configFolder)) {

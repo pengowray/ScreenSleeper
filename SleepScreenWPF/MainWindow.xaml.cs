@@ -36,17 +36,10 @@ namespace SleepScreenWPF {
             InitializeComponent();
         }
 
-        // on start
         private void Window_Loaded(object sender, RoutedEventArgs e) {
-            // TODO: not actually called
-
             // TurnMonitorOn();
             LogThreadsafe("Loading...");
-
             ListenMQTTTask = ListenMQTT(onlyConnectIfAutoTrue: true);
-            //task.Wait(); // don't wait
-            //MessageBox.Show("Loaded");
-            //LogThreadsafe("Loaded.");
         }
 
 
@@ -165,7 +158,7 @@ namespace SleepScreenWPF {
                 if (result.ResultCode == MQTTnet.Client.MqttClientConnectResultCode.Success) {
                     LogThreadsafe("Connected!");
                     await MqttClient.ListenToTopicAsync("$SYS/broker/version"); // show verison e.g. "mosquitto version 2.0.18"
-                    await MqttClient.ListenToTopicAsync("homeassistant/status"); // "online"
+                    await MqttClient.ListenToTopicAsync("homeassistant/status"); // show "online"
                     if (hasAction) {
                         var topics = Config.Action.Select(a => a.Topic).Distinct().Where(topic => !string.IsNullOrWhiteSpace(topic)).ToArray();
                         foreach (var topic in topics) {
@@ -192,12 +185,26 @@ namespace SleepScreenWPF {
         }
 
         private void LogThreadsafe(string text) {
-            //TODO: add datestamp?
             string dateStamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss (zzz)");
             Log.AppendTextSafe($"{dateStamp}: {text}\n");
-            
         }
 
+        private void Show_Config_Folder_Explorer(object sender, RoutedEventArgs e) {
+            SleepConfigManager configMgr = new SleepConfigManager(); // creates the folder
+            string dir = configMgr._configFolder;
+            string file = configMgr._configFile;
+            //string dir = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "ScreenSleeper");
 
+            if (System.IO.Directory.Exists(dir)) { // safety check
+                // show with file selected
+                if (System.IO.File.Exists(System.IO.Path.Combine(dir, file))) {
+                    System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{System.IO.Path.Combine(dir, file)}\"");
+                } else {
+                    System.Diagnostics.Process.Start("explorer.exe", dir);
+                }
+            } else {
+                LogThreadsafe("Config folder not found.");
+            }
+        }
     }
 }
