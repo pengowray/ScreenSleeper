@@ -79,7 +79,11 @@ namespace SleepScreenWPF {
 
         private async Task ListenMQTT(bool onlyConnectIfAutoTrue = false) {
             try {
-                
+                if (MqttClient != null) {
+                    LogThreadsafe("Already connected. Disconnecting...");
+                    MqttClient.Dispose();
+                    MqttClient = null;
+                }
 
                 SleepConfigManager configMgr = new SleepConfigManager();
                 Config = await configMgr.RestoreConfigAsync();
@@ -112,9 +116,15 @@ namespace SleepScreenWPF {
                 MqttClient = new MQTTClient(Config.Server, Config.Username, Config.Password);
 
                 MqttClient.MessageReceived += (s, e) => {
+                    string topic = e.ApplicationMessage.Topic;
                     string payload = e.ApplicationMessage.ConvertPayloadToString();
                     //LogThreadsafe($"Topic:{e.ApplicationMessage.Topic}; Payload:{payload}; Tag:{e.Tag}");
-                    LogThreadsafe($"MQTT: {e.ApplicationMessage.Topic} → '{payload}'");
+                    LogThreadsafe($"MQTT: {topic} → '{payload}'");
+
+                    if (string.IsNullOrWhiteSpace(topic)) {
+                        LogThreadsafe($"Topic is empty. Ignoring message.");
+                        return;
+                    }
 
                     if (Config == null) return;
 
@@ -157,7 +167,7 @@ namespace SleepScreenWPF {
                     await MqttClient.ListenToTopicAsync("$SYS/broker/version"); // show verison e.g. "mosquitto version 2.0.18"
                     await MqttClient.ListenToTopicAsync("homeassistant/status"); // "online"
                     if (hasAction) {
-                        var topics = Config.Action.Select(a => a.Topic).Distinct().ToArray();
+                        var topics = Config.Action.Select(a => a.Topic).Distinct().Where(topic => !string.IsNullOrWhiteSpace(topic)).ToArray();
                         foreach (var topic in topics) {
                             await MqttClient.ListenToTopicAsync(topic);
                             LogThreadsafe($"Listening to topic: {topic}");
@@ -183,8 +193,8 @@ namespace SleepScreenWPF {
 
         private void LogThreadsafe(string text) {
             //TODO: add datestamp?
-
-            Log.AppendTextSafe(text + "\n");
+            string dateStamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss (zzz)");
+            Log.AppendTextSafe($"{dateStamp}: {text}\n");
             
         }
 
