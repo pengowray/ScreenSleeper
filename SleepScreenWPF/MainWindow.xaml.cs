@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices.Marshalling;
 
 namespace SleepScreenWPF {
     /// <summary>
@@ -29,6 +30,8 @@ namespace SleepScreenWPF {
         string? WatchTopic;
         string? WatchPayload;
 
+        SleepConfig Config;
+
         public MainWindow() {
             InitializeComponent();
         }
@@ -39,7 +42,8 @@ namespace SleepScreenWPF {
 
             // TurnMonitorOn();
             LogThreadsafe("Loading...");
-            ListenMQTTTask = ListenMQTT();
+
+            ListenMQTTTask = ListenMQTT(onlyConnectIfAutoTrue: true);
             //task.Wait(); // don't wait
             //MessageBox.Show("Loaded");
             //LogThreadsafe("Loaded.");
@@ -47,7 +51,6 @@ namespace SleepScreenWPF {
 
 
         private void Connect_Button(object sender, RoutedEventArgs e) {
-            LogThreadsafe("Connecting...");
             ListenMQTTTask = ListenMQTT();
             //ListenMQTTTask.Wait();
         }
@@ -74,59 +77,100 @@ namespace SleepScreenWPF {
             LockScreenLib.LockScreen();
         }
 
-        private async Task ListenMQTT() {
+        private async Task ListenMQTT(bool onlyConnectIfAutoTrue = false) {
             try {
+                
+
                 SleepConfigManager configMgr = new SleepConfigManager();
+                Config = await configMgr.RestoreConfigAsync();
 
-                var config = await configMgr.RestoreConfigAsync();
-
-                //todo: check for detauls
-                //todo: better errors
-                if (config.Server == null || config.Topic == null) {
-                    LogThreadsafe("Please configure the MQTT server and topic in the settings.");
+                if (onlyConnectIfAutoTrue && (!Config.AutoConnect.HasValue || !Config.AutoConnect.Value)) {
+                    // not auto connecting
+                    LogThreadsafe("Press connect to listen to MQTT server.");
                     return;
                 }
 
-                if (config.Password == null) {
+                //todo: check for detauls
+                //todo: better errors
+                if (Config.Server == null) {
+                    LogThreadsafe("Please configure the MQTT server in the settings.");
+                    return;
+                }
+
+                if (Config.Username == null) {
+                    LogThreadsafe("Please configure the MQTT username in the settings.");
+                    return;
+                }
+
+                if (Config.Password == null) {
                     LogThreadsafe("Please configure the MQTT password in the settings.");
                     return;
                 }
 
-                LogThreadsafe($"Connecting to MQTT server: {config.Server}...");
+                LogThreadsafe($"Connecting to MQTT server: {Config.Server}...");
 
-                MqttClient = new MQTTClient(config.Server, config.Username, config.Password);
+                MqttClient = new MQTTClient(Config.Server, Config.Username, Config.Password);
+
                 MqttClient.MessageReceived += (s, e) => {
                     string payload = e.ApplicationMessage.ConvertPayloadToString();
                     //LogThreadsafe($"Topic:{e.ApplicationMessage.Topic}; Payload:{payload}; Tag:{e.Tag}");
-                    LogThreadsafe($"MQTT: {e.ApplicationMessage.Topic} : {payload}");
-                    if (!string.IsNullOrEmpty(WatchTopic) && WatchPayload != null) {
-                        if (e.ApplicationMessage.Topic == WatchTopic && payload == WatchPayload) {
-                            LogThreadsafe($"Sleep triggered.");
-                            this.DoSafe(() => { 
-                                Screen_Off(); 
-                                LockScreenLib.LockScreen();}
-                            );
-                            
-                        }
-                    }
+                    LogThreadsafe($"MQTT: {e.ApplicationMessage.Topic} → '{payload}'");
 
-                    //Screen_Off_Button(s, null);
+                    if (Config == null) return;
+
+                    bool hasAction = Config.Action != null && Config.Action.Length > 0;
+                    if (!hasAction) return;
+                    
+                    var matchingActions = Config.Action.Where(a => a.Topic == e.ApplicationMessage.Topic && a.Payload == payload).ToArray();
+                    if (matchingActions.Length > 0) {
+                        foreach (var action in matchingActions) {
+                            LogThreadsafe($"Action: {action.Action}; Topic: {action.Topic}; Payload: {action.Payload}");
+                            var actions = action?.Action?.Split(';');
+                            foreach (var act in actions ?? []) {
+                                switch (act) {
+                                    case "Lock":
+                                        LogThreadsafe("Lock triggered.");
+                                        this.DoSafe(() => LockScreenLib.LockScreen());
+                                        break;
+                                    case "ScreenOff":
+                                        LogThreadsafe("ScreenOff triggered.");
+                                        this.DoSafe(() => Screen_Off());
+                                        break;
+                                    default:
+                                        if (string.IsNullOrEmpty(act)) break;
+                                        LogThreadsafe($"Unknown action: {act}");
+                                        break;
+                                }
+                            }
+                        }
+                    }   
                 };
 
-                WatchTopic = config.Topic;
-                WatchPayload = config.PayloadSleep;
-                
+                bool hasAction = Config.Action != null && Config.Action.Length > 0;
+                if (!hasAction) {
+                    LogThreadsafe("No action(s) configured.");
+                }
+
                 var result = await MqttClient.ConnectAsync();
                 if (result.ResultCode == MQTTnet.Client.MqttClientConnectResultCode.Success) {
                     LogThreadsafe("Connected!");
                     await MqttClient.ListenToTopicAsync("$SYS/broker/version"); // show verison e.g. "mosquitto version 2.0.18"
                     await MqttClient.ListenToTopicAsync("homeassistant/status"); // "online"
-                    await MqttClient.ListenToTopicAsync(config.Topic);
-                    LogThreadsafe($"Listening to topic: {config.Topic}");
+                    if (hasAction) {
+                        var topics = Config.Action.Select(a => a.Topic).Distinct().ToArray();
+                        foreach (var topic in topics) {
+                            await MqttClient.ListenToTopicAsync(topic);
+                            LogThreadsafe($"Listening to topic: {topic}");
+                        }
+                        LogThreadsafe("Action list:");
+                        int count = 0;
+                        foreach (var action in Config?.Action ?? []) {
+                            LogThreadsafe($"{++count}. when topic '{action.Topic}' with payload '{action.Payload}' do '{action.Action}'");
+                        }
+                    }
                 } else {
                     LogThreadsafe("Failed to connect");
                 }
-
 
             } catch (Exception ex) {
                 LogThreadsafe($"Error: {ex.Message}");
