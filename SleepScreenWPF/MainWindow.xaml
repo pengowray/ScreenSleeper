@@ -9,11 +9,17 @@
         Loaded="Window_Loaded"
         >
     <Grid>
-        
-        <Button Content="Connect" HorizontalAlignment="Left" Margin="665,369,0,0" VerticalAlignment="Top" Height="30" Width="105" Click="Connect_Button"/>
-        <Button Content="Lock Screen" HorizontalAlignment="Left" Margin="665,84,0,0" VerticalAlignment="Top" Height="30" Width="105" Click="Lock_Button"/>
-        <Button Content="Sleep Screen" HorizontalAlignment="Left" Margin="665,34,0,0" VerticalAlignment="Top" Height="30" Width="105" Click="Screen_Off_Button"/>
-        <TextBox Name="Log" TextWrapping="Wrap" Text="" VerticalScrollBarVisibility="Auto" Margin="0,0,165,0"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
 
+        <TextBox Grid.Column="0" Name="Log" TextWrapping="Wrap" Text="" VerticalScrollBarVisibility="Auto" Margin="10" />
+
+        <StackPanel Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="10">
+            <Button Content="Test Sleep Screen" Height="30" Width="104" Margin="0,10,0,0" Click="Screen_Off_Button"/>
+            <Button Content="Test Lock Screen" Height="30" Width="104" Margin="0,10,0,0" Click="Lock_Button"/>
+            <Button Content="Connect" Height="30" Width="104" Margin="0,10,0,0" Click="Connect_Button"/>
+        </StackPanel>
     </Grid>
 </Window>
