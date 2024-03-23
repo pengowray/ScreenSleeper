@@ -137,18 +137,18 @@ namespace SleepScreenWPF {
 
                 //todo: check for detauls
                 //todo: better errors
-                if (Config.Server == null) {
-                    LogThreadsafe("Please configure the MQTT server in the settings.");
+                if (Config.Server == null || Config.Server == "example.com" || Config.Server.EndsWith(".example.com")) {
+                    LogThreadsafe("Please configure the server for MQTT in the config.");
                     return;
                 }
 
                 if (Config.Username == null) {
-                    LogThreadsafe("Please configure the MQTT username in the settings.");
+                    LogThreadsafe("Please configure the MQTT username in the config.");
                     return;
                 }
 
                 if (Config.Password == null) {
-                    LogThreadsafe("Please configure the MQTT password in the settings.");
+                    LogThreadsafe("Please configure the MQTT password in the config.");
                     return;
                 }
 
@@ -188,6 +188,10 @@ namespace SleepScreenWPF {
                                     case "ScreenOff":
                                         LogThreadsafe("ScreenOff triggered.");
                                         this.DoSafe(() => Screen_Off());
+                                        break;
+                                    case "ScreenOn":
+                                        LogThreadsafe("ScreenOn triggered.");
+                                        this.DoSafe(() => SleepLib.MonitorOn());
                                         break;
                                     default:
                                         if (string.IsNullOrEmpty(act)) break;

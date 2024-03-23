@@ -36,27 +36,30 @@ public class SleepConfigManager {
     }
 
     private SleepConfig CreateDefaultConfig() {
-        // Set your default values here
+
         var defaultConfig = new SleepConfig {
             ConfigVersion = "1.0",
             Server = "mqtt.example.com", // "mqtt://yourdefaultserver",
-            //Port = "Default", // "Default" or "1883" or "8883" or "8080" or "443"
-            //Protocol = "mqtt", // "mqtt", "mqtts", "ws", "wss"
+            Protocol = "mqtt", // "mqtt", "mqtts", "ws", "wss"
             Username = "screensleeper",
-            Password = "hackme",
+            Password = "yourpassword",
+            Port = "auto-ha",
             AutoConnect = false,
+            AllowBadSSL = false,
+            SocketPath = "/",
             Triggers = new[] {
-                new ActionConfig {
-                    Topic = "your/topic",
-                    Payload = "sleep",
+                new TriggerConfig {
+                    Topic = "myroom/thispc/sleep/set",
+                    Payload = "on",
                     Action = "Lock;ScreenOff",
                 }
             }
         };
 
-        //TODO: port number (defaults to 1883 = no ssl, no websocket)
         //TODO: wildcard support for topic, # and +
         //TODO: regex matching for payload
+        //TODO: jq for payload
+        //TODO: heartbeat / homie
 
         // Optionally, save the default config for future use
         SaveConfigAsync(defaultConfig).Wait();

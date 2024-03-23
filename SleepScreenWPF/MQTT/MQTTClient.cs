@@ -37,7 +37,11 @@ namespace MQTT {
             string protocol = config?.ParseProtocol() ?? "mqtt";
             if (protocol == "wss" || protocol == "ws") {
                 //var wsUri = $"{config.Protocol}://{config.Server}:{config.ParsePort()}";
-                var wsUri = $"{config?.Server}:{config?.ParsePort()}/{config?.SocketPath ?? ""}";
+                string socketPath = config?.SocketPath ?? "";
+                if (socketPath.StartsWith("/")) {
+                    socketPath = socketPath.Substring(1);
+                }
+                var wsUri = $"{config?.Server}:{config?.ParsePort()}/{socketPath}";
                 //mqttOptionsBuilder = mqttOptionsBuilder.WithWebSocketServer(wsUri); // "obsolete"
                 mqttOptionsBuilder = mqttOptionsBuilder.WithWebSocketServer(o => o.WithUri(wsUri));
             } else {
@@ -49,7 +53,7 @@ namespace MQTT {
                     // The used public broker sometimes has invalid certificates. This sample accepts all
                     // certificates. This should not be used in live environments.
                     //o.CertificateValidationHandler = _ => true;
-                    if ((config?.AcceptBadSSL ?? false) == true) {
+                    if ((config?.AllowBadSSL ?? false) == true) {
                         o = o.WithCertificateValidationHandler(_ => true);
                         DisconnectAsync().Wait();
                     }
@@ -58,6 +62,7 @@ namespace MQTT {
                     //o.SslProtocol = SslProtocols.Tls12;
                     //o.WithSslProtocols(SslProtocols.Tls12);
 
+                    //TODO: allow user certs?
                     // Please provide the file path of your certificate file.
                     //var certificate = new X509Certificate("/options/emqxsl-ca.crt", "");
                     //o.Certificates = new List<X509Certificate> { certificate };

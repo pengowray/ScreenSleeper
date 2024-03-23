@@ -13,12 +13,11 @@ public class SleepConfig {
     public string? Protocol { get; set; } // mqtt, mqtts, ws, wss
     public string? Port { get; set; } // default based on protocol; number or "auto" or "default"
     public string? SocketPath { get; set; }
-
     public string? Username { get; set; }
     public string? Password { get; set; }
     public bool? AutoConnect { get; set; }
-    public bool? AcceptBadSSL { get; set; }
-    public ActionConfig[]? Triggers { get; set; }
+    public bool? AllowBadSSL { get; set; }
+    public TriggerConfig[]? Triggers { get; set; }
 
     public int ParsePort() {
         if (int.TryParse(Port, out int p) && p > 0) {
@@ -64,7 +63,7 @@ public class SleepConfig {
     }
 }
 
-public class ActionConfig {
+public class TriggerConfig {
     public string? Action { get; set; } // default: "Lock,ScreenOff"
     public string? Topic { get; set; }
     public string? Payload { get; set; }
