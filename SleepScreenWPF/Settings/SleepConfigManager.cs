@@ -44,12 +44,12 @@ public class SleepConfigManager {
             Username = "screensleeper",
             Password = "yourpassword",
             Port = "auto-ha",
-            AutoConnect = false,
+            AutoConnect = true,
             AllowBadSSL = false,
             SocketPath = "/",
             Triggers = new[] {
                 new TriggerConfig {
-                    Topic = "myroom/thispc/sleep/set",
+                    Topic = "my_pc/sleep/set",
                     Payload = "on",
                     Action = "Lock;ScreenOff",
                 }
