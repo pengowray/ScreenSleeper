@@ -27,7 +27,7 @@ public class SleepConfig {
                 return ParseProtocol() switch {
                     "mqtt" => 1883,
                     "mqtts" => 8883, // Normal MQTT over SSL/TLS
-                    "ws" => 8883, // MQTT over WebSocket
+                    "ws" => 1884, // MQTT over WebSocket
                     "wss" => 8884, // MQTT over WebSocket with SSL/TLS
                     _ => 1883
                 };
