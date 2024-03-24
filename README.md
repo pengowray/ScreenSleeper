@@ -16,16 +16,16 @@ If you don't know what MQTT is and you're not running Home Assistant already, th
 
 This is just a skeleton outline for now
 
-* Compile and Install (no release version yet)
-* Run for the first time
-* Find config file (there's a "Find Config" button to make this easy)
-* Edit and save config (`mqttConfig.json`)
-* Press 'Connect'
-* Auto start the app by making a shortcut in `shell:startup`
+* Download and extract the [current release](https://github.com/pengowray/ScreenSleeper/releases)
+* Run ScreenSleeper.exe for the first time
+* Find config file (there's a "Find Config" button in the app to make this easy)
+* Edit and save the config (`mqttConfig.json`)
+* Click 'Connect'
+* Set ScreenSleeper to auto start when you login by making a shortcut to it in shell:startup. (Hit `Win R` and type `shell:startup` enter, then paste a shortcut to ScreenSleeper.exe into there)
 
 ## Configure Home Assistant
-* Install Home Assistant
-* Install and configure Mosquito Broker
+* Login to your Home Assistant server
+* Install and configure the Mosquitto Broker add-on
 * Create a user in Mosquito (and reduce the user's access if you want to be security conscious)
 * Create an automation,
   * Set what should trigger it under "When"
