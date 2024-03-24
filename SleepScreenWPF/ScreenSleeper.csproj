@@ -6,7 +6,12 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>screensleeper-logo-128.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="screensleeper-logo-128.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="MQTTnet" Version="4.3.3.952" />
