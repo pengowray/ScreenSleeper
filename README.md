@@ -18,10 +18,10 @@ This is just a skeleton outline for now
 
 * Compile and Install (no release version yet)
 * Run for the first time
-* Find config file
-* Edit and save config
-* Connect
-* Auto start by making a shortcut in `shell:startup`
+* Find config file (there's a "Find Config" button to make this easy)
+* Edit and save config (`mqttConfig.json`)
+* Press 'Connect'
+* Auto start the app by making a shortcut in `shell:startup`
 
 ## Configure Home Assistant
 * Install Home Assistant
