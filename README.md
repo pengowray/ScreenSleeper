@@ -22,16 +22,3 @@ This is just a skeleton outline for now
 * Edit and save the config (`mqttConfig.json`)
 * Click 'Connect'
 * Set ScreenSleeper to auto start when you login by making a shortcut to it in shell:startup. (Hit `Win R` and type `shell:startup` enter, then paste a shortcut to ScreenSleeper.exe into there)
-
-## Configure Home Assistant
-* Login to your Home Assistant server
-* Install and configure the Mosquitto Broker add-on
-* Create a user in Mosquito (and reduce the user's access if you want to be security conscious)
-* Create an automation,
-  * Set what should trigger it under "When"
-  * Under "Then do", add action "MQTT: Publish".
-  * For topic: "my_pc/sleep/set"
-  * For payload: "on"
-  * Save automation
-  * Note: You can customize the topic and payload to anything you like, just set them the same in ScreenSleeper's config (mqttConfig.json)
-* Copy MQTT details to ScreenSleeper's config file
