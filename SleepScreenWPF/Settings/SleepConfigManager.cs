@@ -13,7 +13,17 @@ public class SleepConfigManager {
     public readonly string _configFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), _appName);
     public readonly string _configFile = "mqttConfig.json";
 
-    public SleepConfigManager() {
+    private static SleepConfigManager? _instance;
+    public static SleepConfigManager Instance {
+        get {
+            if (_instance == null) {
+                _instance = new SleepConfigManager();
+            }
+            return _instance;
+        }
+    }
+
+    private SleepConfigManager() {
         if (!Directory.Exists(_configFolder)) {
             Directory.CreateDirectory(_configFolder);
         }
@@ -62,7 +72,7 @@ public class SleepConfigManager {
         //TODO: heartbeat / homie
 
         // Optionally, save the default config for future use
-        SaveConfigAsync(defaultConfig).Wait();
+        SaveConfigAsync(defaultConfig);
 
         return defaultConfig;
     }

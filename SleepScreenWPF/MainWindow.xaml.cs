@@ -126,7 +126,7 @@ namespace SleepScreenWPF {
                     MqttClient = null;
                 }
 
-                SleepConfigManager configMgr = new SleepConfigManager();
+                SleepConfigManager configMgr = SleepConfigManager.Instance;
                 Config = await configMgr.RestoreConfigAsync();
 
                 if (onlyConnectIfAutoTrue && (!Config.AutoConnect.HasValue || !Config.AutoConnect.Value)) {
@@ -178,7 +178,7 @@ namespace SleepScreenWPF {
                     if (matchingActions.Length > 0) {
                         foreach (var action in matchingActions) {
                             LogThreadsafe($"Action: {action.Action}; Topic: {action.Topic}; Payload: {action.Payload}");
-                            var actions = action?.Action?.Split(';');
+                            var actions = action?.Action?.Split(';').Where(a => !string.IsNullOrWhiteSpace(a)).Select(a => a.Trim());
                             foreach (var act in actions ?? []) {
                                 switch (act) {
                                     case "Lock":
@@ -247,7 +247,7 @@ namespace SleepScreenWPF {
         }
 
         private void Show_Config_Folder_Explorer(object sender, RoutedEventArgs e) {
-            SleepConfigManager configMgr = new SleepConfigManager(); // creates the folder
+            SleepConfigManager configMgr = SleepConfigManager.Instance; //note: creates the folder (though already done earlier)
             string dir = configMgr._configFolder;
             string file = configMgr._configFile;
             //string dir = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "ScreenSleeper");

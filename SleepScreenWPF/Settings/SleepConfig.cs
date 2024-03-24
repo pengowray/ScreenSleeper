@@ -64,8 +64,8 @@ public class SleepConfig {
 }
 
 public class TriggerConfig {
-    public string? Action { get; set; } // default: "Lock,ScreenOff"
     public string? Topic { get; set; }
     public string? Payload { get; set; }
+    public string? Action { get; set; } // default: "Lock;ScreenOff"
 }
 
