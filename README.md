@@ -14,11 +14,11 @@ If you don't know what MQTT is and you're not running Home Assistant already, th
 
 ## Setting up ScreenSleeper
 
-This is just a skeleton outline for now
-
 * Download and extract the [current release](https://github.com/pengowray/ScreenSleeper/releases)
 * Run ScreenSleeper.exe for the first time
 * Find config file (there's a "Find Config" button in the app to make this easy)
-* Edit and save the config (`mqttConfig.json`)
+* Edit and save the config (There's a [detailed breakdown of the config file](https://github.com/pengowray/ScreenSleeper/wiki/config) in the wiki, if you need it)
 * Click 'Connect'
-* Set ScreenSleeper to auto start when you login by making a shortcut to it in shell:startup. (Hit `Win R` and type `shell:startup` enter, then paste a shortcut to ScreenSleeper.exe into there)
+* Set ScreenSleeper to auto start when you login by making a shortcut to it in shell:startup. (Hit `Win R` and type `shell:startup` enter; copy `ScreenSleeper.exe` from where you unzipped it and paste a shortcut into the Startup folder)
+
+If you're using HA, [here's instructions to create an Automation to trigger ScreenSleeper](https://github.com/pengowray/ScreenSleeper/wiki/Home-Assistant-automation).
