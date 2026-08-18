@@ -17,7 +17,6 @@ namespace MQTT {
         public event EventHandler<string> StatusEvent;
 
         int RetryAttempts = 0;
-        int MaxRetry = 5;
         bool KeepRetrying = true; // set to false e.g. when user disconnects or certificate fails
 
         public MQTTClient(SleepConfig config) {
@@ -81,11 +80,11 @@ namespace MQTT {
                 StatusEvent?.Invoke(this, $"### DISCONNECTED FROM SERVER ### {args.ConnectResult}: {args.ReasonString}");
                 if (!KeepRetrying) {
                     return;
-                } else if (++RetryAttempts > MaxRetry) {
+                } else if (config.MQTTRetry > 0 && ++RetryAttempts > config.MQTTRetry) {
                     StatusEvent?.Invoke(this, "### MAX RETRY ATTEMPTS REACHED ###");
                     return;
                 } else {
-                    StatusEvent?.Invoke(this, $"### RECONNECTING {RetryAttempts}/{MaxRetry} ###");
+                    StatusEvent?.Invoke(this, $"### RECONNECTING {RetryAttempts} ###");
                 }
                 await Task.Delay(TimeSpan.FromSeconds(5));
                 try {

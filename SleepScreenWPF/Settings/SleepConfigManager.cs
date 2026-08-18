@@ -54,6 +54,7 @@ public class SleepConfigManager {
             Username = "screensleeper",
             Password = "yourpassword",
             Port = "auto-ha",
+            MQTTRetry = 5,
             AutoConnect = true,
             AllowBadSSL = false,
             SocketPath = "/",
