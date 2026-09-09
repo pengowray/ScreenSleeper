@@ -54,7 +54,7 @@ public class SleepConfigManager {
             Username = "screensleeper",
             Password = "yourpassword",
             Port = "auto-ha",
-            MQTTRetry = 5,
+            MQTTRetry = 0, // 0 keeps retrying; a broker that comes back later should just work
             AutoConnect = true,
             AllowBadSSL = false,
             SocketPath = "/",

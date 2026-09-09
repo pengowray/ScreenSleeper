@@ -45,6 +45,9 @@ public class SleepConfig {
     }
 
     // Reconnection attempts before giving up. 0 or less means keep retrying indefinitely.
+    // New configs are written with 0. The 5 here is only for a config saved before MQTTRetry
+    // existed: no value means we keep the limit that was hard coded at the time, rather than
+    // changing how an existing install behaves.
     public int ParseMaxRetry() {
         return MQTTRetry ?? 5;
     }
