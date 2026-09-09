@@ -242,13 +242,16 @@ namespace SleepScreenWPF {
             }
         }
 
+        // The log box is a scrollback buffer, not a record: a broker that stays down would otherwise grow it forever.
+        private const int MaxLogLines = 2000;
+
         private void LogWriteLine(string text) {
             Log.Text += text + "\n";
         }
 
         private void LogThreadsafe(string text) {
             string dateStamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss (zzz)");
-            Log.AppendTextSafe($"{dateStamp}: {text}\n");
+            Log.AppendTextSafe($"{dateStamp}: {text}\n", MaxLogLines);
         }
 
         private void Show_Config_Folder_Explorer(object sender, RoutedEventArgs e) {
