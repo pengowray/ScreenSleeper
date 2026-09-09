@@ -1,5 +1,4 @@
 ﻿using MQTTnet;
-using MQTTnet.Client;
 using SleepScreenWPF.Settings;
 using System;
 using System.Collections.Generic;
@@ -28,8 +27,8 @@ namespace MQTT {
         readonly object TopicsLock = new object(); // added from the UI thread, read from MQTTnet's
 
         public MQTTClient(SleepConfig config) {
-            var mqttFactory = new MqttFactory();
-            _mqttClient = mqttFactory.CreateMqttClient();
+            var mqttClientFactory = new MqttClientFactory();
+            _mqttClient = mqttClientFactory.CreateMqttClient();
 
             if (config == null) {
                 throw new ArgumentException("Config is null");

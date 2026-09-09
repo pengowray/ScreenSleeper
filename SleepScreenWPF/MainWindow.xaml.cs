@@ -224,7 +224,7 @@ namespace SleepScreenWPF {
                 }
 
                 var result = await MqttClient.ConnectAsync();
-                if (result.ResultCode == MQTTnet.Client.MqttClientConnectResultCode.Success) {
+                if (result.ResultCode == MQTTnet.MqttClientConnectResultCode.Success) {
                     //LogThreadsafe("Connected!"); // redundant
                     await MqttClient.ListenToTopicAsync("$SYS/broker/version"); // show verison e.g. "mosquitto version 2.0.18"
                     await MqttClient.ListenToTopicAsync("homeassistant/status"); // show "online"

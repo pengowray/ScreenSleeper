@@ -9,7 +9,7 @@
 // ReSharper disable InconsistentNaming
 // ReSharper disable UnusedMember.Local
 
-using MQTTnet.Client;
+using MQTTnet;
 using MQTTnet.Packets;
 using MQTTnet.Protocol;
 //using MQTTnet.Samples.Helpers;
@@ -22,9 +22,9 @@ public static class Client_Subscribe_Samples {
          * This sample subscribes to a topic and processes the received message.
          */
 
-        var mqttFactory = new MqttFactory();
+        var mqttClientFactory = new MqttClientFactory();
 
-        using (var mqttClient = mqttFactory.CreateMqttClient()) {
+        using (var mqttClient = mqttClientFactory.CreateMqttClient()) {
             var mqttClientOptions = new MqttClientOptionsBuilder().WithTcpServer("broker.hivemq.com").Build();
 
             // Setup message handling before connecting so that queued messages
@@ -39,7 +39,7 @@ public static class Client_Subscribe_Samples {
 
             await mqttClient.ConnectAsync(mqttClientOptions, CancellationToken.None);
 
-            var mqttSubscribeOptions = mqttFactory.CreateSubscribeOptionsBuilder()
+            var mqttSubscribeOptions = mqttClientFactory.CreateSubscribeOptionsBuilder()
                 .WithTopicFilter(
                     f => {
                         f.WithTopic("mqttnet/samples/topic/2");
@@ -60,9 +60,9 @@ public static class Client_Subscribe_Samples {
          * This sample subscribes to a topic and sends a response to the broker. This requires at least QoS level 1 to work!
          */
 
-        var mqttFactory = new MqttFactory();
+        var mqttClientFactory = new MqttClientFactory();
 
-        using (var mqttClient = mqttFactory.CreateMqttClient()) {
+        using (var mqttClient = mqttClientFactory.CreateMqttClient()) {
             mqttClient.ApplicationMessageReceivedAsync += delegate (MqttApplicationMessageReceivedEventArgs args) {
                 // Do some work with the message...
 
@@ -81,7 +81,7 @@ public static class Client_Subscribe_Samples {
 
             await mqttClient.ConnectAsync(mqttClientOptions, CancellationToken.None);
 
-            var mqttSubscribeOptions = mqttFactory.CreateSubscribeOptionsBuilder()
+            var mqttSubscribeOptions = mqttClientFactory.CreateSubscribeOptionsBuilder()
                 .WithTopicFilter(
                     f => {
                         f.WithTopic("mqttnet/samples/topic/1");
@@ -102,16 +102,16 @@ public static class Client_Subscribe_Samples {
          * This sample subscribes to several topics in a single request.
          */
 
-        var mqttFactory = new MqttFactory();
+        var mqttClientFactory = new MqttClientFactory();
 
-        using (var mqttClient = mqttFactory.CreateMqttClient()) {
+        using (var mqttClient = mqttClientFactory.CreateMqttClient()) {
             var mqttClientOptions = new MqttClientOptionsBuilder().WithTcpServer("broker.hivemq.com").Build();
 
             await mqttClient.ConnectAsync(mqttClientOptions, CancellationToken.None);
 
             // Create the subscribe options including several topics with different options.
             // It is also possible to all of these topics using a dedicated call of _SubscribeAsync_ per topic.
-            var mqttSubscribeOptions = mqttFactory.CreateSubscribeOptionsBuilder()
+            var mqttSubscribeOptions = mqttClientFactory.CreateSubscribeOptionsBuilder()
                 .WithTopicFilter(
                     f => {
                         f.WithTopic("mqttnet/samples/topic/1");
@@ -140,14 +140,14 @@ public static class Client_Subscribe_Samples {
          * This sample subscribes to a topic.
          */
 
-        var mqttFactory = new MqttFactory();
+        var mqttClientFactory = new MqttClientFactory();
 
-        using (var mqttClient = mqttFactory.CreateMqttClient()) {
+        using (var mqttClient = mqttClientFactory.CreateMqttClient()) {
             var mqttClientOptions = new MqttClientOptionsBuilder().WithTcpServer("broker.hivemq.com").Build();
 
             await mqttClient.ConnectAsync(mqttClientOptions, CancellationToken.None);
 
-            var mqttSubscribeOptions = mqttFactory.CreateSubscribeOptionsBuilder()
+            var mqttSubscribeOptions = mqttClientFactory.CreateSubscribeOptionsBuilder()
                 .WithTopicFilter(
                     f => {
                         f.WithTopic("mqttnet/samples/topic/1");
