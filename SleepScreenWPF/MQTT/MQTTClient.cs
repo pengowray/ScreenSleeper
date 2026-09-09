@@ -2,6 +2,8 @@
 using MQTTnet.Client;
 using SleepScreenWPF.Settings;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
@@ -20,6 +22,10 @@ namespace MQTT {
         int RetryAttempts = 0;
         bool KeepRetrying = true; // set to false e.g. when user disconnects or certificate fails
         CancellationTokenSource RetryCancel = new CancellationTokenSource(); // cancels the wait between retries
+
+        // Topics we have asked for, so we can ask again after a reconnect.
+        readonly HashSet<string> SubscribedTopics = new HashSet<string>();
+        readonly object TopicsLock = new object(); // added from the UI thread, read from MQTTnet's
 
         public MQTTClient(SleepConfig config) {
             var mqttFactory = new MqttFactory();
@@ -115,6 +121,7 @@ namespace MQTT {
                 StatusEvent?.Invoke(this, $"### CONNECTED TO SERVER ### {args.ConnectResult.ResultCode} {args.ConnectResult.ResponseInformation}");
                 if (args.ConnectResult.ResultCode == MqttClientConnectResultCode.Success) {
                     RetryAttempts = 0;
+                    await ResubscribeAsync();
                 }
 
                 if (!string.IsNullOrWhiteSpace(args.ConnectResult.ServerReference)) {
@@ -152,11 +159,40 @@ namespace MQTT {
         }
 
         public async Task ListenToTopicAsync(string topic) {
+            lock (TopicsLock) {
+                SubscribedTopics.Add(topic);
+            }
+
             var mqttSubscribeOptions = new MqttClientSubscribeOptionsBuilder()
                 .WithTopicFilter(f => f.WithTopic(topic))
                 .Build();
 
             await _mqttClient.SubscribeAsync(mqttSubscribeOptions);
+        }
+
+        // We connect with a clean session, so the broker forgets our subscriptions every time the
+        // connection drops. Ask for them again once we are back.
+        private async Task ResubscribeAsync() {
+            string[] topics;
+            lock (TopicsLock) {
+                topics = SubscribedTopics.ToArray();
+            }
+
+            if (topics.Length == 0) {
+                return; // first connect: the caller subscribes once ConnectAsync returns
+            }
+
+            var builder = new MqttClientSubscribeOptionsBuilder();
+            foreach (var topic in topics) {
+                builder = builder.WithTopicFilter(f => f.WithTopic(topic));
+            }
+
+            try {
+                await _mqttClient.SubscribeAsync(builder.Build());
+                StatusEvent?.Invoke(this, $"### LISTENING AGAIN TO {topics.Length} TOPIC(S) ###");
+            } catch (Exception ex) {
+                StatusEvent?.Invoke(this, $"### COULD NOT LISTEN AGAIN ### {ex.Message}");
+            }
         }
 
         public async Task DisconnectAsync() {
