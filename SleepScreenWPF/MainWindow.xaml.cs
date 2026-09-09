@@ -92,9 +92,19 @@ namespace SleepScreenWPF {
             //ListenMQTTTask.Wait();
         }
 
-        private void Disconnect_Button(object sender, RoutedEventArgs e) {
+        // async void because this is an event handler: blocking the UI thread here deadlocks against
+        // the status events the disconnect raises, which come back through Dispatcher.Invoke.
+        private async void Disconnect_Button(object sender, RoutedEventArgs e) {
             LogThreadsafe("Disconnecting...");
-            MqttClient?.DisconnectAsync().Wait();
+            if (MqttClient == null) {
+                return;
+            }
+
+            try {
+                await MqttClient.DisconnectAsync();
+            } catch (Exception ex) {
+                LogThreadsafe($"Error: {ex.Message}");
+            }
         }
 
         private void TurnMonitorOn() {
