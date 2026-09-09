@@ -152,12 +152,11 @@ namespace SleepScreenWPF {
                     return;
                 }
 
-                if (Config.MQTTRetry == 0)
-                {
-                    LogThreadsafe($"Connecting to MQTT server {Config.ParseFullUrl()} with indefinite retries...");
-                } else
-                {
-                    LogThreadsafe($"Connecting to MQTT server {Config.ParseFullUrl()} retrying up to {Config.MQTTRetry} time(s)...");
+                int maxRetry = Config.ParseMaxRetry();
+                if (maxRetry <= 0) {
+                    LogThreadsafe($"Connecting to MQTT server {Config.ParseFullUrl()} (retrying until it answers)...");
+                } else {
+                    LogThreadsafe($"Connecting to MQTT server {Config.ParseFullUrl()} (up to {maxRetry} retries)...");
                 }
 
                 MqttClient = new MQTTClient(Config);

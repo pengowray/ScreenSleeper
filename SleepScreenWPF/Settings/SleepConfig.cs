@@ -44,6 +44,11 @@ public class SleepConfig {
         }
     }
 
+    // Reconnection attempts before giving up. 0 or less means keep retrying indefinitely.
+    public int ParseMaxRetry() {
+        return MQTTRetry ?? 5;
+    }
+
     public string ParseProtocol() {
         string protocol = Protocol?.ToLowerInvariant()?.Trim() ?? "mqtt";
         if (protocol == "wss" || protocol == "ws" || protocol == "mqtt" || protocol == "mqtts") {

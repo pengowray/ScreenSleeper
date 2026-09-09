@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MQTT {
@@ -18,6 +19,7 @@ namespace MQTT {
 
         int RetryAttempts = 0;
         bool KeepRetrying = true; // set to false e.g. when user disconnects or certificate fails
+        CancellationTokenSource RetryCancel = new CancellationTokenSource(); // cancels the wait between retries
 
         public MQTTClient(SleepConfig config) {
             var mqttFactory = new MqttFactory();
@@ -75,21 +77,36 @@ namespace MQTT {
 
             _mqttClientOptions = mqttOptionsBuilder.Build();
 
-            //TODO: configurable reconnection
             _mqttClient.DisconnectedAsync += async (args) => {
                 StatusEvent?.Invoke(this, $"### DISCONNECTED FROM SERVER ### {args.ConnectResult}: {args.ReasonString}");
                 if (!KeepRetrying) {
                     return;
-                } else if (config.MQTTRetry > 0 && ++RetryAttempts > config.MQTTRetry) {
+                }
+
+                int maxRetry = config.ParseMaxRetry(); // 0 or less means retry indefinitely
+                RetryAttempts++;
+                if (maxRetry > 0 && RetryAttempts > maxRetry) {
                     StatusEvent?.Invoke(this, "### MAX RETRY ATTEMPTS REACHED ###");
                     return;
-                } else {
-                    StatusEvent?.Invoke(this, $"### RECONNECTING {RetryAttempts} ###");
                 }
-                await Task.Delay(TimeSpan.FromSeconds(5));
+
+                var delay = RetryDelay(RetryAttempts);
+                string attempt = maxRetry > 0 ? $"{RetryAttempts}/{maxRetry}" : $"{RetryAttempts}";
+                StatusEvent?.Invoke(this, $"### RECONNECTING {attempt} IN {delay.TotalSeconds:0}s ###");
+
+                try {
+                    await Task.Delay(delay, RetryCancel.Token);
+                } catch (OperationCanceledException) {
+                    return; // user disconnected while we were waiting
+                }
+                if (!KeepRetrying) {
+                    return;
+                }
+
                 try {
                     await _mqttClient.ConnectAsync(_mqttClientOptions);
                 } catch {
+                    // a failed connect raises DisconnectedAsync again, which schedules the next attempt
                     StatusEvent?.Invoke(this, "### RECONNECTION ERROR ###");
                 }
             };
@@ -117,8 +134,20 @@ namespace MQTT {
             };
         }
 
+        // Wait between reconnection attempts: 5s, 10s, 20s, 40s, then 60s for every attempt after that.
+        private static TimeSpan RetryDelay(int attempt) {
+            const int baseSeconds = 5;
+            const int maxSeconds = 60;
+            int shift = Math.Min(Math.Max(attempt - 1, 0), 5);
+            return TimeSpan.FromSeconds(Math.Min(baseSeconds << shift, maxSeconds));
+        }
+
         public async Task<MqttClientConnectResult> ConnectAsync() {
             KeepRetrying = true;
+            RetryAttempts = 0;
+            if (RetryCancel.IsCancellationRequested) {
+                RetryCancel = new CancellationTokenSource();
+            }
             return await _mqttClient.ConnectAsync(_mqttClientOptions);
         }
 
@@ -132,6 +161,7 @@ namespace MQTT {
 
         public async Task DisconnectAsync() {
             KeepRetrying = false;
+            RetryCancel.Cancel(); // stop waiting out a backoff delay
             if (_mqttClient != null) {
                 await _mqttClient.DisconnectAsync();
             }
@@ -139,6 +169,7 @@ namespace MQTT {
 
         public void Dispose() {
             KeepRetrying = false;
+            RetryCancel.Cancel();
             _mqttClient?.Dispose();
         }
     }
