@@ -61,8 +61,7 @@ namespace MQTT {
                     // certificates. This should not be used in live environments.
                     //o.CertificateValidationHandler = _ => true;
                     if ((config?.AllowBadSSL ?? false) == true) {
-                        o = o.WithCertificateValidationHandler(_ => true);
-                        DisconnectAsync().Wait();
+                        o.WithCertificateValidationHandler(_ => true);
                     }
 
                     // The default value is determined by the OS. Set manually to force version.
