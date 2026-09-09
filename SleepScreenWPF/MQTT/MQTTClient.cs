@@ -42,12 +42,13 @@ namespace MQTT {
             var mqttOptionsBuilder = new MqttClientOptionsBuilder();
             string protocol = config?.ParseProtocol() ?? "mqtt";
             if (protocol == "wss" || protocol == "ws") {
-                //var wsUri = $"{config.Protocol}://{config.Server}:{config.ParsePort()}";
+                // MQTTnet 4 took a schemeless host:port/path here and picked ws or wss from the TLS
+                // options. MQTTnet 5 rejects anything without a ws:// or wss:// scheme, so pass it.
                 string socketPath = config?.SocketPath ?? "";
-                if (socketPath.StartsWith("/")) {
-                    socketPath = socketPath.Substring(1);
+                if (!socketPath.StartsWith("/")) {
+                    socketPath = "/" + socketPath;
                 }
-                var wsUri = $"{config?.Server}:{config?.ParsePort()}/{socketPath}";
+                var wsUri = $"{protocol}://{config?.Server}:{config?.ParsePort()}{socketPath}";
                 //mqttOptionsBuilder = mqttOptionsBuilder.WithWebSocketServer(wsUri); // "obsolete"
                 mqttOptionsBuilder = mqttOptionsBuilder.WithWebSocketServer(o => o.WithUri(wsUri));
             } else {
