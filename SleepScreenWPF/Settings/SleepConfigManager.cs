@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Text;
 using System.Text.Json;
@@ -54,7 +54,7 @@ public class SleepConfigManager {
             Username = "screensleeper",
             Password = "yourpassword",
             Port = "auto-ha",
-            MQTTRetry = 0, // 0 keeps retrying; a broker that comes back later should just work
+            MQTTRetry = -1, // -1 keeps retrying; a broker that comes back later should just work
             AutoConnect = true,
             AllowBadSSL = false,
             SocketPath = "/",

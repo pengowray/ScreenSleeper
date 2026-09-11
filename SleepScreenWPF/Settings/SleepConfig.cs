@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Text;
 using System.Text.Json;
@@ -44,10 +44,10 @@ public class SleepConfig {
         }
     }
 
-    // Reconnection attempts before giving up. 0 or less means keep retrying indefinitely.
-    // New configs are written with 0. The 5 here is only for a config saved before MQTTRetry
-    // existed: no value means we keep the limit that was hard coded at the time, rather than
-    // changing how an existing install behaves.
+    // Reconnection attempts before giving up: -1 or less keeps retrying indefinitely, 0 never
+    // retries, and a positive number is a limit. New configs are written with -1.
+    // The 5 here is only for a config saved before MQTTRetry existed: no value means we keep the
+    // limit that was hard coded at the time, rather than changing how an existing install behaves.
     public int ParseMaxRetry() {
         return MQTTRetry ?? 5;
     }

@@ -1,4 +1,4 @@
-﻿using MQTT;
+using MQTT;
 using MQTTnet;
 using SleepScreenWPF.Settings;
 using System.Text;
@@ -163,8 +163,10 @@ namespace SleepScreenWPF {
                 }
 
                 int maxRetry = Config.ParseMaxRetry();
-                if (maxRetry <= 0) {
+                if (maxRetry < 0) {
                     LogThreadsafe($"Connecting to MQTT server {Config.ParseFullUrl()} (retrying until it answers)...");
+                } else if (maxRetry == 0) {
+                    LogThreadsafe($"Connecting to MQTT server {Config.ParseFullUrl()} (one attempt only)...");
                 } else {
                     LogThreadsafe($"Connecting to MQTT server {Config.ParseFullUrl()} (up to {maxRetry} retries)...");
                 }

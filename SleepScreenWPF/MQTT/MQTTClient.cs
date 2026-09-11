@@ -1,4 +1,4 @@
-﻿using MQTTnet;
+using MQTTnet;
 using SleepScreenWPF.Settings;
 using System;
 using System.Collections.Generic;
@@ -88,10 +88,12 @@ namespace MQTT {
                     return;
                 }
 
-                int maxRetry = config.ParseMaxRetry(); // 0 or less means retry indefinitely
+                int maxRetry = config.ParseMaxRetry(); // negative means retry indefinitely
                 RetryAttempts++;
-                if (maxRetry > 0 && RetryAttempts > maxRetry) {
-                    StatusEvent?.Invoke(this, "### MAX RETRY ATTEMPTS REACHED ###");
+                if (maxRetry >= 0 && RetryAttempts > maxRetry) {
+                    StatusEvent?.Invoke(this, maxRetry == 0
+                        ? "### NOT RECONNECTING: RETRIES ARE TURNED OFF ###"
+                        : "### MAX RETRY ATTEMPTS REACHED ###");
                     return;
                 }
 
