@@ -91,9 +91,10 @@ namespace MQTT {
                 int maxRetry = config.ParseMaxRetry(); // negative means retry indefinitely
                 RetryAttempts++;
                 if (maxRetry >= 0 && RetryAttempts > maxRetry) {
-                    StatusEvent?.Invoke(this, maxRetry == 0
-                        ? "### NOT RECONNECTING: RETRIES ARE TURNED OFF ###"
-                        : "### MAX RETRY ATTEMPTS REACHED ###");
+                    // With maxRetry 0 the disconnect line above is the whole story.
+                    if (maxRetry > 0) {
+                        StatusEvent?.Invoke(this, "### MAX RETRY ATTEMPTS REACHED ###");
+                    }
                     return;
                 }
 
